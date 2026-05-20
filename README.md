@@ -7,6 +7,7 @@ A Model Context Protocol (MCP) server designed to compare Qlik Sense application
 ## Features
 
 - **Get Tenant Info**: Fetch environment status, region, and configuration metadata for a Qlik Sense tenant.
+- **List Apps**: Retrieve all applications inside the tenant. If the requested limit exceeds Qlik's API maximum (100), the server automatically paginates behind the scenes to fetch up to your target limit.
 - **Compare Scripts**: Perform comparative diffs between two Qlik Sense app scripts, reporting added, modified, or deleted segments along with an evaluation summary.
 - **Dual Transport Options**:
   - **Stdio**: Standard input/output transport for direct host integration (Claude Desktop, Cursor, etc.).
