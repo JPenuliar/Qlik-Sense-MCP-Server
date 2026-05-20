@@ -5,6 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { mcpServer } from "./src/mcp-server.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { qlikAppService } from "./src/services/qlik-app-service.js";
 
 async function startServer() {
   // Check if we should run in Stdio mode (standard CLI for Claude/Cursor/Inspector)
@@ -55,6 +56,31 @@ async function startServer() {
           }
         ]
       });
+    });
+
+    // Test endpoint to execute tools directly (for dashboard testing)
+    app.post("/api/test-tool", async (req, res) => {
+      const { name, args } = req.body;
+      const context = {
+        token: process.env.QLIK_API_KEY,
+        tenantUrl: process.env.QLIK_TENANT_URL,
+        platformFlags: {}
+      };
+
+      try {
+        let result: any;
+        if (name === "get_tenant_info") {
+          result = await qlikAppService.getTenantInfo(args.tenantId, context);
+        } else if (name === "compare_scripts") {
+          result = await qlikAppService.compareScripts(args.appId1, args.appId2, context);
+        } else {
+          throw new Error("Invalid tool name");
+        }
+        res.json(result);
+      } catch (err: any) {
+        console.error(`Error executing test tool ${name}:`, err);
+        res.status(500).json({ error: err.message });
+      }
     });
 
     // SSE connection endpoint

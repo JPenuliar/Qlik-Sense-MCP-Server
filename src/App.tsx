@@ -46,34 +46,27 @@ export default function App() {
     setToolExecuting(true);
     setToolResult(null);
 
+    const args = selectedTool === 'get_tenant_info'
+      ? { tenantId }
+      : { appId1, appId2 };
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 600)); // simulate response latency
-      if (selectedTool === 'get_tenant_info') {
-        setToolResult({
-          id: tenantId,
-          name: "Acme Corp Qlik Tenant",
-          status: "Active",
-          region: "us-east-1",
-          governanceConfig: {
-            retentionDays: 90,
-            autoArchive: true,
-            allowedAppsCount: 24
-          }
-        });
-      } else {
-        setToolResult({
-          app1: appId1,
-          app2: appId2,
-          differences: [
-            { section: "Main", type: "Added", line: "SET ThousandSep=',';" },
-            { section: "Load Data", type: "Modified", line: "LOAD * FROM [lib://DataFiles/sales.csv];" },
-            { section: "Variables", type: "Deleted", line: "LET vVersion = '1.2';" }
-          ],
-          summary: "Added regional formatting parameters, updated sales data source connection, and removed deprecated version variables.",
-          riskLevel: "LOW",
-          syntheticKeysDetected: false
-        });
+      const res = await fetch('/api/test-tool', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: selectedTool,
+          args
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to execute tool');
       }
+      setToolResult(data);
     } catch (err: any) {
       setToolResult({ error: err.message });
     } finally {
