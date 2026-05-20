@@ -1,0 +1,1 @@
+{"name":"Qlik Sense MCP Server","description":"An integration server based on a specific 4-layer architecture designed to act as a Function Calling backend for Gemini AI Studio to compare Qlik Sense scripts and summarize differences.","requestFramePermissions":[],"majorCapabilities":["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]}
