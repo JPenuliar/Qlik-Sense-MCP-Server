@@ -77,3 +77,38 @@ mcpServer.registerTool(
     }
   }
 );
+
+// Register Tool: list_apps
+mcpServer.registerTool(
+  "list_apps",
+  {
+    description: "Lists apps in the Qlik Sense tenant with pagination support.",
+    inputSchema: z.object({
+      limit: z.number().optional().describe("Max number of apps to return (default 50, max 100)"),
+      next: z.string().optional().describe("Pagination cursor token from the previous response"),
+    }),
+  },
+  async ({ limit, next }) => {
+    try {
+      const result = await qlikAppService.listApps({ limit, next }, defaultContext);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (error: any) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+);

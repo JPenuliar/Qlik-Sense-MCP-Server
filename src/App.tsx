@@ -11,6 +11,8 @@ export default function App() {
   const [tenantId, setTenantId] = useState('tenant-123-uuid');
   const [appId1, setAppId1] = useState('app-finance-2024');
   const [appId2, setAppId2] = useState('app-finance-2025');
+  const [limit, setLimit] = useState('50');
+  const [nextCursor, setNextCursor] = useState('');
   const [toolResult, setToolResult] = useState<any>(null);
   const [toolExecuting, setToolExecuting] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
@@ -46,9 +48,14 @@ export default function App() {
     setToolExecuting(true);
     setToolResult(null);
 
-    const args = selectedTool === 'get_tenant_info'
-      ? { tenantId }
-      : { appId1, appId2 };
+    let args = {};
+    if (selectedTool === 'get_tenant_info') {
+      args = { tenantId };
+    } else if (selectedTool === 'list_apps') {
+      args = { limit: limit ? parseInt(limit, 10) : undefined, next: nextCursor || undefined };
+    } else {
+      args = { appId1, appId2 };
+    }
 
     try {
       const res = await fetch('/api/test-tool', {
@@ -185,6 +192,10 @@ export default function App() {
                   <p className="text-[11px] text-slate-500 mt-1">Retrieves metadata details for a specific Qlik Sense tenant environment.</p>
                 </div>
                 <div className="border-l-2 border-blue-500 pl-3">
+                  <div className="text-xs font-bold text-slate-700 font-mono">list_apps</div>
+                  <p className="text-[11px] text-slate-500 mt-1">Lists all apps inside the Qlik Sense tenant with support for cursor pagination.</p>
+                </div>
+                <div className="border-l-2 border-blue-500 pl-3">
                   <div className="text-xs font-bold text-slate-700 font-mono">compare_scripts</div>
                   <p className="text-[11px] text-slate-500 mt-1">Compares the Qlik script sections of two separate apps and gives change report summaries.</p>
                 </div>
@@ -304,6 +315,12 @@ export default function App() {
                     get_tenant_info
                   </button>
                   <button 
+                    onClick={() => { setSelectedTool('list_apps'); setToolResult(null); }}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded border transition-colors ${selectedTool === 'list_apps' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-300'}`}
+                  >
+                    list_apps
+                  </button>
+                  <button 
                     onClick={() => { setSelectedTool('compare_scripts'); setToolResult(null); }}
                     className={`px-3 py-1.5 text-xs font-semibold rounded border transition-colors ${selectedTool === 'compare_scripts' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-300'}`}
                   >
@@ -328,6 +345,35 @@ export default function App() {
                         placeholder="e.g. tenant-abc-123"
                         required
                       />
+                    </div>
+                  ) : selectedTool === 'list_apps' ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="limit" className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                          limit (Max items, default 50)
+                        </label>
+                        <input 
+                          type="number" 
+                          id="limit"
+                          className="w-full bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none py-2 px-3 text-xs text-slate-700 font-mono"
+                          value={limit}
+                          onChange={(e) => setLimit(e.target.value)}
+                          placeholder="50"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="nextCursor" className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                          next cursor (pagination token)
+                        </label>
+                        <input 
+                          type="text" 
+                          id="nextCursor"
+                          className="w-full bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none py-2 px-3 text-xs text-slate-700 font-mono"
+                          value={nextCursor}
+                          onChange={(e) => setNextCursor(e.target.value)}
+                          placeholder="e.g. cursor-token-abc"
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 gap-4">

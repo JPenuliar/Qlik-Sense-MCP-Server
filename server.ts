@@ -47,6 +47,14 @@ async function startServer() {
             }
           },
           {
+            name: "list_apps",
+            description: "Lists apps in the Qlik Sense tenant with pagination support.",
+            parameters: {
+              limit: "number (optional, default 50)",
+              next: "string (optional)"
+            }
+          },
+          {
             name: "compare_scripts",
             description: "Compares scripts from two Qlik Sense applications and generates a summary report of differences.",
             parameters: {
@@ -71,6 +79,11 @@ async function startServer() {
         let result: any;
         if (name === "get_tenant_info") {
           result = await qlikAppService.getTenantInfo(args.tenantId, context);
+        } else if (name === "list_apps") {
+          result = await qlikAppService.listApps({
+            limit: args.limit ? parseInt(args.limit, 10) : undefined,
+            next: args.next || undefined
+          }, context);
         } else if (name === "compare_scripts") {
           result = await qlikAppService.compareScripts(args.appId1, args.appId2, context);
         } else {
